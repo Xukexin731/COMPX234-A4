@@ -18,13 +18,13 @@ def handle_client_request(filename, client_address, server_socket):
                 server_socket.sendto(f"ERR {filename} PORT_ERROR".encode(), client_address)
                 return
     try:
-        # Check if the file exists and is readable
         if not (os.path.exists(filename) and os.access(filename, os.R_OK)):
             server_socket.sendto(f"ERR {filename} NOT_FOUND".encode(), client_address)
             return
         file_size = os.path.getsize(filename)
         server_socket.sendto(f"OK {filename} SIZE {file_size} PORT {port}".encode(), client_address)
         print(f"[TRANSFER] Starting {filename} ({file_size} bytes) on port {port}")
+        
         with open(filename, 'rb') as f:
             while True:
                 try:
