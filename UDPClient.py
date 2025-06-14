@@ -43,22 +43,19 @@ def download_file(control_sock, filename, server_address):
                     start = downloaded
                     end = min(start + 999, file_size - 1)
                     request = f"FILE {filename} GET START {start} END {end}"
+                    
+                    response = send_and_receive(data_sock, request, data_address)
+                    if not response:
+                        print("[ERROR] No data response")
+                        continue
+
+                    if " DATA " not in response:
+                        print(f"[ERROR] Invalid response format: {response[:50]}...")
+                        continue
+
+                    header, payload = response.split(" DATA ", 1)
+                    expected_header = f"FILE {filename} OK START {start} END {end}"
     
-    try:
-        with open(filename, 'wb') as f:
-            block_size = 1000
-            downloaded = 0  
-            
-            while downloaded < file_size:
-                start = downloaded  
-                end = min(downloaded + block_size - 1, file_size - 1) 
-                
-                request_msg = f"FILE {filename} GET START {start} END {end}"
-                try:
-                    response = send_and_receive(sock, request_msg, (server_host, data_port))
-                except Exception as e:
-                    print(f"  Block download failed: {e}")
-                    return False
                 
                 data_parts = response.split()
                 if (len(data_parts) < 7 or data_parts[0] != "FILE" or data_parts[1] != filename or 
