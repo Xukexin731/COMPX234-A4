@@ -25,3 +25,8 @@ def handle_client_request(filename, client_address, server_socket):
         file_size = os.path.getsize(filename)
         server_socket.sendto(f"OK {filename} SIZE {file_size} PORT {port}".encode(), client_address)
         print(f"[TRANSFER] Starting {filename} ({file_size} bytes) on port {port}")
+        with open(filename, 'rb') as f:
+            while True:
+                try:
+                    data, addr = client_socket.recvfrom(2048)
+                    request = data.decode().strip()
