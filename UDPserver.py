@@ -17,3 +17,8 @@ def handle_client_request(filename, client_address, server_socket):
             if attempt == 2:
                 server_socket.sendto(f"ERR {filename} PORT_ERROR".encode(), client_address)
                 return
+    try:
+        # Check if the file exists and is readable
+        if not (os.path.exists(filename) and os.access(filename, os.R_OK)):
+            server_socket.sendto(f"ERR {filename} NOT_FOUND".encode(), client_address)
+            return
