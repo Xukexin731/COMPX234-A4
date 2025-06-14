@@ -101,3 +101,11 @@ def download_file(sock, server_host, server_port, filename):
     except IOError as e:
         print(f"  File I/O error: {e}")
         return False
+def main():
+    if len(sys.argv) != 4:
+        print("Usage: python UDPClient.py <server_host> <server_port> <file_list>")
+        sys.exit(1)
+    
+    server_host = sys.argv[1]
+    server_port = int(sys.argv[2])
+    file_list_path = sys.argv[3]
