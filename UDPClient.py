@@ -33,6 +33,9 @@ def download_file(control_sock, filename, server_address):
     data_address = (server_address[0], data_port)
     print(f"[INFO] Downloading {filename} ({file_size} bytes) via port {data_port}")
     
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as data_sock:
+        data_sock.settimeout(5)
+    
     try:
         file_size = int(parts[3])
         data_port = int(parts[5])
