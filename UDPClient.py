@@ -120,3 +120,8 @@ def main():
         print("No files specified in file list")
         sys.exit(1)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    for filename in files:
+        success = download_file(sock, server_host, server_port, filename)
+        print(f"Download {'succeeded' if success else 'failed'}: {filename}\n")
+    
+    sock.close()
