@@ -4,20 +4,19 @@ import base64
 import os
 MAX_RETRIES = 5
 INITIAL_TIMEOUT = 500
-def send_and_receive(sock, message, address, max_retries=MAX_RETRIES, initial_timeout=INITIAL_TIMEOUT):
-    retries = 0
-    timeout = initial_timeout
-    while retries < max_retries:
-        try:
-            sock.sendto(message.encode(), address)
-            sock.settimeout(timeout / 1000)
-            response, _ = sock.recvfrom(65536)
-            return response.decode()
-        except socket.timeout:
-            retries += 1
-            timeout *= 2
-            print(f"  Timeout (attempt {retries}/{max_retries}), retrying...")
-    raise Exception("Max retries exceeded")
+def send_and_receive(sock, message, server_address, timeout=2, max_retries=3):
+    for attempt in range(max_retries):
+         try:
+            sock.sendto(message.encode(), server_address)
+            sock.settimeout(timeout * (attempt + 1))
+            response, _ = sock.recvfrom(4096)
+            return response.decode().strip()
+         except socket.timeout:
+            print(f"[RETRY] Timeout (attempt {attempt + 1})")
+         except Exception as e:
+            print(f"[ERROR] Communication error: {str(e)}")
+            break
+    return None
 
 def download_file(sock, server_host, server_port, filename):
     print(f"Requesting file: {filename}")
