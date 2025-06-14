@@ -48,3 +48,16 @@ def handle_client_request(filename, client_address, server_socket):
                         response = f"FILE {filename} OK START {start} END {end} DATA {encoded}"
                         client_socket.sendto(response.encode(), addr)
                         print(f"[SENT] Block {start}-{end} ({len(chunk)} bytes)")
+                    elif request.startswith(f"FILE {filename} CLOSE"):
+                        client_socket.sendto(f"FILE {filename} CLOSE_OK".encode(), addr)
+                        break
+
+                except socket.timeout:
+                    continue
+                except Exception as e:
+                    print(f"[ERROR] Processing error: {str(e)}")
+                    break
+
+    finally:
+        client_socket.close()
+        print(f"[COMPLETE] Transfer finished for {filename}")
