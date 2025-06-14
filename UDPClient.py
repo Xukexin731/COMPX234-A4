@@ -18,3 +18,6 @@ def send_and_receive(sock, message, address, max_retries=MAX_RETRIES, initial_ti
             timeout *= 2
             print(f"  Timeout (attempt {retries}/{max_retries}), retrying...")
     raise Exception("Max retries exceeded")
+    def download_file(sock, server_host, server_port, filename):
+        response = send_and_receive(sock, f"DOWNLOAD {filename}", (server_host, server_port))
+        parts = response.split()
