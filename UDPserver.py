@@ -69,3 +69,23 @@ def main():
         print("Usage: python3 UDPserver.py <port>")
         sys.exit(1)
     port = int(sys.argv[1])
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+   
+
+    try:
+        server_socket.bind(('', port))
+        print(f"[SERVER] Listening on port {port}")
+
+        while True:
+            data, addr = server_socket.recvfrom(1024)
+            message = data.decode().strip()
+
+            if message.startswith("DOWNLOAD"):
+                filename = message.split()[1]
+                print(f"[REQUEST] {addr} requested {filename}")
+                thread = threading.Thread(
+                    target=handle_client_request,
+                    args=(filename, addr, server_socket),
+                    daemon=True
+                )
+                thread.start()
