@@ -26,3 +26,9 @@ def send_and_receive(sock, message, address, max_retries=MAX_RETRIES, initial_ti
         file_size = int(parts[3])
         data_port = int(parts[5])
         with open(filename, 'wb') as f:
+            while downloaded < file_size:
+            request_msg = f"FILE {filename} GET START {start} END {end}"
+            response = send_and_receive(sock, request_msg, (server_host, data_port))
+            data_parts = response.split()
+            base64_data = response[data_idx:]
+            file_data = base64.b64decode(base64_data)
