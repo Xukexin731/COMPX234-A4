@@ -102,48 +102,36 @@ def download_file(sock, server_host, server_port, filename):
         print(f"  File I/O error: {e}")
         return False
 def main():
-    try:
-        if len(sys.argv) != 4:
-            print("Error: Incorrect number of arguments")
-            print("Usage: python UDPClient.py <server_host> <server_port> <file_list>")
-            print("Example: python UDPClient.py localhost 51234 files.txt")
-            sys.exit(1)
-        
-        server_host = sys.argv[1]
-        server_port = int(sys.argv[2])
-        file_list_path = sys.argv[3]
-        if not os.path.exists(file_list_path):
-            print(f"Error: File list not found - {file_list_path}")
-            print("Please ensure correct file path is provided")
-            sys.exit(1)
-        
-
-        with open(file_list_path, 'r') as f:
-            files = [line.strip() for line in f if line.strip()]
-    
-        if not files:
-            print("Error: File list is empty")
-            print(f"Please check file: {file_list_path}")
-            sys.exit(1)
-        
-        # Create UDP socket
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
-        # Download each file
-        total_files = len(files)
-        success_count = 0
-        for i, filename in enumerate(files):
-            print(f"\nStarting download ({i+1}/{total_files}): {filename}")
-            success = download_file(sock, server_host, server_port, filename)
-            if success:
-                success_count += 1
-            print(f"File download {'succeeded' if success else 'failed'}: {filename}")
-        
-        # Show summary
-        print(f"\nDownload summary: {success_count}/{total_files} files downloaded successfully")
-        
-        sock.close()
-        
-    except Exception as e:
-        print(f"Client error: {e}")
+    # Parse command-line arguments
+    if len(sys.argv) != 4:
+        print("Usage: python3 UDPclient.py <hostname> <port> <files.txt>")
         sys.exit(1)
+
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+    fileslist = sys.argv[3]
+    server_address = (host, port)
+
+    # Create a UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server_address = (hostname, port)
+
+    # Read the file list
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as control_sock:
+        control_sock.settimeout(3)
+
+        try:
+            with open(filelist) as f:
+                files = [line.strip() for line in f if line.strip()]
+
+            for filename in files:
+                if not download_file(control_sock, filename, server_address):
+                    print(f"[WARNING] Failed to download {filename}")
+
+        except FileNotFoundError:
+            print(f"[ERROR] File list {filelist} not found")
+        except Exception as e:
+            print(f"[ERROR] Fatal error: {str(e)}")
+
+if __name__ == "__main__":
+    main()
