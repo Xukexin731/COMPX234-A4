@@ -55,48 +55,33 @@ def download_file(control_sock, filename, server_address):
 
                     header, payload = response.split(" DATA ", 1)
                     expected_header = f"FILE {filename} OK START {start} END {end}"
-    
+
+                    if header != expected_header:
+                        print(f"[ERROR] Header mismatch: expected {expected_header}, got {header}")
+                        continue
+
+                    try:
+                        chunk = base64.b64decode(payload)
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        print(f"\r[PROGRESS] {downloaded}/{file_size} bytes ({downloaded * 100 / file_size:.1f}%)",
+                              end="")
+                    except Exception as e:
+                        print(f"\n[ERROR] Decoding failed: {str(e)}")
+                        continue
+
+            # Confirm closing
+            response = send_and_receive(data_sock, f"FILE {filename} CLOSE", data_address)
+            if response == f"FILE {filename} CLOSE_OK":
+                print(f"\n[SUCCESS] {filename} downloaded successfully")
+                return True
+
+        except Exception as e:
+            print(f"\n[CRITICAL] Download failed: {str(e)}")
+            if os.path.exists(filename):
+                os.remove(filename)
+            return False
                 
-                data_parts = response.split()
-                if (len(data_parts) < 7 or data_parts[0] != "FILE" or data_parts[1] != filename or 
-                    data_parts[2] != "OK" or data_parts[3] != "START" or data_parts[5] != "END"):
-                    print(f"  Invalid data response: {response[:50]}")
-                    return False
-                
-                data_idx = response.find("DATA ") + 5 
-                if data_idx < 5:
-                    print("  DATA field missing")
-                    return False
-                
-                base64_data = response[data_idx:]
-                try:
-                    file_data = base64.b64decode(base64_data)
-                except Exception:
-                    print("  Base64 decode error")
-                    return False
-        
-                f.seek(start)  
-                f.write(file_data)
-                downloaded += len(file_data)  
-                print('*', end='', flush=True)  
-            
-            print("\n  File download complete")
-            
- 
-            try:
-                close_resp = send_and_receive(sock, f"FILE {filename} CLOSE", 
-                                            (server_host, data_port))
-                if close_resp != f"FILE {filename} CLOSE_OK":
-                    print("  Invalid close confirmation")
-            except Exception as e:
-                print(f"  Close failed: {e}")
-                return False
-            
-            return True
-            
-    except IOError as e:
-        print(f"  File I/O error: {e}")
-        return False
 def main():
     # Parse command-line arguments
     if len(sys.argv) != 4:
