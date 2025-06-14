@@ -18,23 +18,20 @@ def send_and_receive(sock, message, server_address, timeout=2, max_retries=3):
             break
     return None
 
-def download_file(sock, server_host, server_port, filename):
-    print(f"Requesting file: {filename}")
-    try:
-        response = send_and_receive(sock, f"DOWNLOAD {filename}", (server_host, server_port))
-    except Exception as e:
-        print(f"  Download failed: {e}")
+def download_file(control_sock, filename, server_address):
+    response = send_and_receive(control_sock, f"DOWNLOAD {filename}", server_address)
+    if not response:
+        print(f"[FAILED] No response for {filename}")
         return False
-    
-    # 处理响应
+    if response.startswith("ERR"):
+        print(f"[ERROR] Server response: {response}")
+        return False
+    # Parse the OK response
     parts = response.split()
-    if parts[0] == "ERR":
-        print(f"  Server error: {' '.join(parts[1:])}")
-        return False
-    
-    if parts[0] != "OK" or len(parts) < 6 or parts[2] != "SIZE" or parts[4] != "PORT":
-        print(f"  Invalid response: {response}")
-        return False
+    file_size = int(parts[3])
+    data_port = int(parts[5])
+    data_address = (server_address[0], data_port)
+    print(f"[INFO] Downloading {filename} ({file_size} bytes) via port {data_port}")
     
     try:
         file_size = int(parts[3])
