@@ -89,3 +89,10 @@ def main():
                     daemon=True
                 )
                 thread.start()
+    except KeyboardInterrupt:
+        print("\n[SERVER] Shutting down...")
+    finally:
+        server_socket.close()
+
+if __name__ == "__main__":
+    main()
