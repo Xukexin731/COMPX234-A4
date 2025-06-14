@@ -112,25 +112,38 @@ def main():
         server_host = sys.argv[1]
         server_port = int(sys.argv[2])
         file_list_path = sys.argv[3]
-    if not os.path.exists(file_list_path):
+        if not os.path.exists(file_list_path):
             print(f"Error: File list not found - {file_list_path}")
             print("Please ensure correct file path is provided")
             sys.exit(1)
         
 
-    with open(file_list_path, 'r') as f:
-        files = [line.strip() for line in f if line.strip()]
+        with open(file_list_path, 'r') as f:
+            files = [line.strip() for line in f if line.strip()]
     
-    if not files:
+        if not files:
             print("Error: File list is empty")
             print(f"Please check file: {file_list_path}")
             sys.exit(1)
         
         # Create UDP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         # Download each file
-    total_files = len(files)
-    success_count = 0
-if __name__ == "__main__":
-    main()
+        total_files = len(files)
+        success_count = 0
+        for i, filename in enumerate(files):
+            print(f"\nStarting download ({i+1}/{total_files}): {filename}")
+            success = download_file(sock, server_host, server_port, filename)
+            if success:
+                success_count += 1
+            print(f"File download {'succeeded' if success else 'failed'}: {filename}")
+        
+        # Show summary
+        print(f"\nDownload summary: {success_count}/{total_files} files downloaded successfully")
+        
+        sock.close()
+        
+    except Exception as e:
+        print(f"Client error: {e}")
+        sys.exit(1)
