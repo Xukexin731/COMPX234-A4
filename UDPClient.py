@@ -36,13 +36,13 @@ def download_file(control_sock, filename, server_address):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as data_sock:
         data_sock.settimeout(5)
     
-    try:
-        file_size = int(parts[3])
-        data_port = int(parts[5])
-        print(f"  File size: {file_size} bytes, Data port: {data_port}")
-    except ValueError:
-        print(f"  Invalid size/port in response: {response}")
-        return False
+        try:
+            with open(filename, 'wb') as f:
+                downloaded = 0
+                while downloaded < file_size:
+                    start = downloaded
+                    end = min(start + 999, file_size - 1)
+                    request = f"FILE {filename} GET START {start} END {end}"
     
     try:
         with open(filename, 'wb') as f:
