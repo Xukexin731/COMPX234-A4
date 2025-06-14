@@ -61,3 +61,11 @@ def handle_client_request(filename, client_address, server_socket):
     finally:
         client_socket.close()
         print(f"[COMPLETE] Transfer finished for {filename}")
+
+
+def main():
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python3 UDPserver.py <port>")
+        sys.exit(1)
+    port = int(sys.argv[1])
