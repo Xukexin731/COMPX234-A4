@@ -109,3 +109,14 @@ def main():
     server_host = sys.argv[1]
     server_port = int(sys.argv[2])
     file_list_path = sys.argv[3]
+    if not os.path.exists(file_list_path):
+        print(f"File list not found: {file_list_path}")
+        sys.exit(1)
+    
+    with open(file_list_path, 'r') as f:
+        files = [line.strip() for line in f if line.strip()]
+    
+    if not files:
+        print("No files specified in file list")
+        sys.exit(1)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
