@@ -102,13 +102,16 @@ def download_file(sock, server_host, server_port, filename):
         print(f"  File I/O error: {e}")
         return False
 def main():
-    if len(sys.argv) != 4:
-        print("Usage: python UDPClient.py <server_host> <server_port> <file_list>")
-        sys.exit(1)
-    
-    server_host = sys.argv[1]
-    server_port = int(sys.argv[2])
-    file_list_path = sys.argv[3]
+    try:
+        if len(sys.argv) != 4:
+            print("Error: Incorrect number of arguments")
+            print("Usage: python UDPClient.py <server_host> <server_port> <file_list>")
+            print("Example: python UDPClient.py localhost 51234 files.txt")
+            sys.exit(1)
+        
+        server_host = sys.argv[1]
+        server_port = int(sys.argv[2])
+        file_list_path = sys.argv[3]
     if not os.path.exists(file_list_path):
         print(f"File list not found: {file_list_path}")
         sys.exit(1)
