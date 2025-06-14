@@ -30,3 +30,21 @@ def handle_client_request(filename, client_address, server_socket):
                 try:
                     data, addr = client_socket.recvfrom(2048)
                     request = data.decode().strip()
+                    if request.startswith(f"FILE {filename} GET"):
+                        parts = request.split()
+                        start = int(parts[4])
+                        end = int(parts[6])
+                        f.seek(start)
+                        chunk = f.read(end - start + 1)
+
+                        if not chunk:  # End of file reading
+                            break
+
+                        encoded = base64.b64encode(chunk).decode('utf-8')
+                        if not encoded:
+                            print("[ERROR] Base64 encoding failed!")
+                            continue
+
+                        response = f"FILE {filename} OK START {start} END {end} DATA {encoded}"
+                        client_socket.sendto(response.encode(), addr)
+                        print(f"[SENT] Block {start}-{end} ({len(chunk)} bytes)")
