@@ -113,9 +113,11 @@ def main():
         server_port = int(sys.argv[2])
         file_list_path = sys.argv[3]
     if not os.path.exists(file_list_path):
-        print(f"File list not found: {file_list_path}")
-        sys.exit(1)
-    
+            print(f"Error: File list not found - {file_list_path}")
+            print("Please ensure correct file path is provided")
+            sys.exit(1)
+        
+
     with open(file_list_path, 'r') as f:
         files = [line.strip() for line in f if line.strip()]
     
