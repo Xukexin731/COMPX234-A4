@@ -21,3 +21,8 @@ def send_and_receive(sock, message, address, max_retries=MAX_RETRIES, initial_ti
     def download_file(sock, server_host, server_port, filename):
         response = send_and_receive(sock, f"DOWNLOAD {filename}", (server_host, server_port))
         parts = response.split()
+        if parts[0] == "ERR":
+            return False
+        file_size = int(parts[3])
+        data_port = int(parts[5])
+        with open(filename, 'wb') as f:
