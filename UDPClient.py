@@ -18,17 +18,22 @@ def send_and_receive(sock, message, address, max_retries=MAX_RETRIES, initial_ti
             timeout *= 2
             print(f"  Timeout (attempt {retries}/{max_retries}), retrying...")
     raise Exception("Max retries exceeded")
-    def download_file(sock, server_host, server_port, filename):
-        response = send_and_receive(sock, f"DOWNLOAD {filename}", (server_host, server_port))
-        parts = response.split()
-        if parts[0] == "ERR":
-            return False
-        file_size = int(parts[3])
-        data_port = int(parts[5])
-        with open(filename, 'wb') as f:
-            while downloaded < file_size:
+def download_file(sock, server_host, server_port, filename):
+    response = send_and_receive(sock, f"DOWNLOAD {filename}", (server_host, server_port))
+    parts = response.split()
+    if parts[0] == "ERR":
+        return False
+    file_size = int(parts[3])
+    data_port = int(parts[5])
+    with open(filename, 'wb') as f:
+        while downloaded < file_size:
             request_msg = f"FILE {filename} GET START {start} END {end}"
             response = send_and_receive(sock, request_msg, (server_host, data_port))
             data_parts = response.split()
             base64_data = response[data_idx:]
             file_data = base64.b64decode(base64_data)
+            f.seek(start)
+            f.write(file_data)
+            print('*', end='', flush=True)  
+        close_resp = send_and_receive(sock, f"FILE {filename} CLOSE", (server_host, data_port))
+    return True
