@@ -122,13 +122,15 @@ def main():
         files = [line.strip() for line in f if line.strip()]
     
     if not files:
-        print("No files specified in file list")
-        sys.exit(1)
+            print("Error: File list is empty")
+            print(f"Please check file: {file_list_path}")
+            sys.exit(1)
+        
+        # Create UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    for filename in files:
-        success = download_file(sock, server_host, server_port, filename)
-        print(f"Download {'succeeded' if success else 'failed'}: {filename}\n")
-    
-    sock.close()
+        
+        # Download each file
+    total_files = len(files)
+    success_count = 0
 if __name__ == "__main__":
     main()
