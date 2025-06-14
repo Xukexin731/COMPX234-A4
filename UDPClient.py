@@ -125,3 +125,5 @@ def main():
         print(f"Download {'succeeded' if success else 'failed'}: {filename}\n")
     
     sock.close()
+if __name__ == "__main__":
+    main()
